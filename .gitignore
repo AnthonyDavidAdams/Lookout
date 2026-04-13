@@ -1,0 +1,18 @@
+# Xcode
+*.xcodeproj
+xcuserdata/
+*.xcworkspace
+DerivedData/
+build/
+
+# Build artifacts
+Lookout.app/
+LookoutBinary
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Secrets
+.env

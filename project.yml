@@ -1,0 +1,24 @@
+name: Lookout
+options:
+  bundleIdPrefix: com.175g
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+targets:
+  Lookout:
+    type: application
+    platform: macOS
+    sources:
+      - Lookout
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.175g.lookout
+        INFOPLIST_FILE: Lookout/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Lookout/Lookout.entitlements
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: 1
+        GENERATE_INFOPLIST_FILE: false
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
