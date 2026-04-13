@@ -13,6 +13,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         setupPanel()
         setupMenuBar()
 
+        // Ensure ~/.lookout/context.md exists
+        CustomContextService.ensureContextFile()
+
         // Prompt for screen recording permission if not yet granted
         if !ScreenCaptureService.hasPermission {
             ScreenCaptureService.requestPermission()

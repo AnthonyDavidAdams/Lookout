@@ -16,3 +16,8 @@ LookoutBinary
 
 # Secrets
 .env
+
+# Build/temp assets
+assets/*.mov
+assets/icon_1024.png
+assets/Lookout.iconset/

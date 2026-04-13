@@ -21,40 +21,51 @@ Lookout was inspired by helping mothers and co-workers with their computers. Ins
 - **Streams responses** — answers appear in real-time as they're generated
 - **Smart about screenshots** — auto-captures at the start or after inactivity, uses a tool for on-demand captures (saves tokens on conversational follow-ups)
 - **Manages long conversations** — strips old images and auto-summarizes history to stay within context limits
+- **Personalizable** — add custom context in `~/.lookout/context.md` so it knows who you are
 
-## Setup
+## Install
 
-### Prerequisites
-
-- macOS 14 (Sonoma) or later
-- [Homebrew](https://brew.sh)
-- A [Claude API key](https://console.anthropic.com)
-
-### Build
+One command:
 
 ```bash
 git clone https://github.com/AnthonyDavidAdams/Lookout.git
 cd Lookout
-chmod +x build.sh
-./build.sh
+./install.sh
 ```
 
-Or if you prefer Xcode:
+This builds the app, installs it to `/Applications`, creates your config file, and offers to launch it.
+
+Or build manually:
 
 ```bash
-chmod +x setup.sh
-./setup.sh        # installs xcodegen if needed, generates .xcodeproj
-open Lookout.xcodeproj
-# Build & Run (Cmd+R)
+./build.sh
+open Lookout.app
 ```
+
+### Prerequisites
+
+- macOS 14 (Sonoma) or later
+- Xcode Command Line Tools (`xcode-select --install`)
+- A [Claude API key](https://console.anthropic.com)
 
 ### First run
 
-1. Launch `Lookout.app`
-2. Click the **eye icon** in your menu bar
-3. Enter your Claude API key (or set it in Settings)
-4. Grant **Screen Recording** permission when prompted
-5. Ask anything about your screen
+1. Click the **eye icon** in your menu bar
+2. Enter your Claude API key
+3. Grant **Screen Recording** permission when prompted
+4. Ask anything about your screen
+
+## Personalize
+
+Edit `~/.lookout/context.md` to add context about yourself:
+
+```markdown
+I'm not very technical, please explain things simply.
+I use my Mac for photo editing with Lightroom and Photoshop.
+My name is Mom.
+```
+
+This is included in every conversation so Lookout tailors its responses to you.
 
 ## Usage
 
@@ -92,6 +103,7 @@ Pure Swift, no dependencies. Built with:
 
 ```
 Lookout/
+├── install.sh                   # One-click installer
 ├── build.sh                     # Build script (no Xcode needed)
 ├── setup.sh                     # Xcode project generator
 ├── project.yml                  # xcodegen spec
@@ -110,6 +122,7 @@ Lookout/
         ├── ClaudeAPIService.swift        # Streaming + tool use
         ├── ConversationManager.swift     # State, history, summarization
         ├── SystemContextService.swift    # Running apps + window titles
+        ├── CustomContextService.swift    # ~/.lookout/context.md reader
         └── ActionService.swift           # Tool implementations
 ```
 

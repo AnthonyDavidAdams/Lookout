@@ -28,7 +28,13 @@ mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources"
 
 mv "$BUILD_DIR/LookoutBinary" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
-# Write resolved Info.plist (no Xcode variables)
+
+# Copy icon
+if [ -f "$BUILD_DIR/assets/Lookout.icns" ]; then
+    cp "$BUILD_DIR/assets/Lookout.icns" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
+fi
+
+# Write resolved Info.plist
 cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -38,6 +44,8 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
     <string>en</string>
     <key>CFBundleExecutable</key>
     <string>Lookout</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
     <string>com.175g.lookout</string>
     <key>CFBundleInfoDictionaryVersion</key>
@@ -69,7 +77,5 @@ echo ""
 echo "  $APP_BUNDLE"
 echo ""
 echo "To run:  open $APP_BUNDLE"
-echo ""
-echo "First time: macOS will ask for Screen Recording permission."
-echo "Grant it in System Settings → Privacy & Security → Screen Recording."
+echo "Install: cp -r $APP_BUNDLE /Applications/"
 echo ""

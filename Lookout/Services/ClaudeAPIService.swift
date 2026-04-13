@@ -2,7 +2,7 @@ import Foundation
 
 final class ClaudeAPIService {
 
-    static let systemPrompt = """
+    static let baseSystemPrompt = """
         You are Lookout, a friendly AI screen assistant. You can see the user's \
         screen and help them navigate their computer.
 
@@ -33,6 +33,15 @@ final class ClaudeAPIService {
         Be helpful and proactive. If the user needs something opened or found, just \
         do it. You're like a knowledgeable friend helping them with their computer.
         """
+
+    /// Build the full system prompt, including any custom user context from ~/.lookout/context.md
+    static var systemPrompt: String {
+        let custom = CustomContextService().loadContext()
+        if let custom = custom {
+            return baseSystemPrompt + "\n\n[User Context]\n" + custom
+        }
+        return baseSystemPrompt
+    }
 
     static let tools: [[String: Any]] = [
         [
