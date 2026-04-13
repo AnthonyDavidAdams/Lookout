@@ -132,4 +132,4 @@ Lookout/
 
 ---
 
-Provided as a public utility by [Earth Pilot](https://earthpilot.org) — Mission Support for Spaceship Earth.
+Provided as a public utility by <a href="https://earthpilot.org"><img src="assets/earthpilot-logo.png" alt="Earth Pilot" width="18" height="18" style="vertical-align: middle;"></a> [Earth Pilot](https://earthpilot.org) — Mission Support for Spaceship Earth.
