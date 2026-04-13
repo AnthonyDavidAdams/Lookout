@@ -114,6 +114,38 @@ final class ActionService {
         }
     }
 
+    // MARK: - Save Note (agent memory about the user)
+
+    private var notesPath: String { NSHomeDirectory() + "/.lookout/notes.md" }
+
+    func saveNote(note: String) -> ActionResult {
+        let dir = NSHomeDirectory() + "/.lookout"
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+
+        let timestamp = ISO8601DateFormatter().string(from: Date())
+        let entry = "- [\(timestamp)] \(note)\n"
+
+        if FileManager.default.fileExists(atPath: notesPath),
+           let handle = FileHandle(forWritingAtPath: notesPath) {
+            handle.seekToEndOfFile()
+            handle.write(entry.data(using: .utf8)!)
+            handle.closeFile()
+        } else {
+            let header = "# Lookout Notes\n\nThings I've learned about this user.\n\n"
+            try? (header + entry).write(toFile: notesPath, atomically: true, encoding: .utf8)
+        }
+
+        return ActionResult(success: true, output: "Note saved.")
+    }
+
+    func readNotes() -> ActionResult {
+        guard FileManager.default.fileExists(atPath: notesPath),
+              let content = try? String(contentsOfFile: notesPath, encoding: .utf8) else {
+            return ActionResult(success: true, output: "No notes yet.")
+        }
+        return ActionResult(success: true, output: content)
+    }
+
     // MARK: - Dispatch
 
     func execute(toolName: String, input: [String: Any]) async -> ActionResult {
@@ -129,6 +161,11 @@ final class ActionService {
         case "open_item":
             let path = input["path"] as? String ?? ""
             return openItem(path: path)
+        case "save_note":
+            let note = input["note"] as? String ?? ""
+            return saveNote(note: note)
+        case "read_notes":
+            return readNotes()
         default:
             return ActionResult(success: false, output: "Unknown tool: \(toolName)")
         }

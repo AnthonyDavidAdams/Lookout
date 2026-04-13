@@ -29,6 +29,15 @@ final class ClaudeAPIService {
         - list_applications: see what's installed
         - search_files: find files and folders by name or content
         - open_item: open an app, file, or folder
+        - save_note: save an observation about the user for future conversations
+        - read_notes: recall what you know about this user from past sessions
+
+        At the start of a new conversation, use read_notes to recall what you know \
+        about this user. As you help them, use save_note to remember useful things: \
+        what they struggle with, what apps they use, their skill level, projects \
+        they're working on, preferences. Keep notes concise and useful. Don't save \
+        every interaction — just things that would help you be a better assistant \
+        next time.
 
         Be helpful and proactive. If the user needs something opened or found, just \
         do it. You're like a knowledgeable friend helping them with their computer.
@@ -92,6 +101,29 @@ final class ClaudeAPIService {
                     ] as [String: Any]
                 ] as [String: Any],
                 "required": ["path"]
+            ] as [String: Any]
+        ],
+        [
+            "name": "save_note",
+            "description": "Save a note about the user — what they're working on, things they struggle with, preferences you've observed, or anything useful for future conversations. Notes persist across sessions in ~/.lookout/notes.md.",
+            "input_schema": [
+                "type": "object",
+                "properties": [
+                    "note": [
+                        "type": "string",
+                        "description": "The observation or note to save about the user"
+                    ] as [String: Any]
+                ] as [String: Any],
+                "required": ["note"]
+            ] as [String: Any]
+        ],
+        [
+            "name": "read_notes",
+            "description": "Read all saved notes about this user from previous conversations. Check this at the start of a conversation to recall what you know about them.",
+            "input_schema": [
+                "type": "object",
+                "properties": [:] as [String: Any],
+                "required": [] as [String]
             ] as [String: Any]
         ]
     ]
