@@ -2,6 +2,8 @@
 
 An AI screen assistant for macOS. Lookout sees your screen and helps you navigate your computer — like a knowledgeable friend looking over your shoulder.
 
+![Lookout](assets/screenshot.png)
+
 ## Why
 
 Every day, people call their kids, coworkers, or IT help desk to ask "how do I do this on my computer?" They're staring at the screen, trying to describe what they see, while someone on the other end guesses what they're looking at.
