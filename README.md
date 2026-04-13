@@ -129,3 +129,7 @@ Lookout/
 ## License
 
 [CC BY-NC 4.0](LICENSE) — free for non-commercial use with attribution.
+
+---
+
+Provided as a public utility by [Earth Pilot](https://earthpilot.org) — Mission Support for Spaceship Earth.
