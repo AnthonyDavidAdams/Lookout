@@ -10,7 +10,7 @@ An AI screen assistant for macOS. Lookout sees your screen and helps you navigat
 
 Every day, people call their kids, coworkers, or IT help desk to ask "how do I do this on my computer?" They're staring at the screen, trying to describe what they see, while someone on the other end guesses what they're looking at.
 
-Lookout was inspired by helping mothers and co-workers with their computers. Instead of a phone call where you're both guessing, Lookout can actually see the screen and give specific, contextual guidance: "Click the blue Save button in the top-right corner" instead of "there should be a button somewhere."
+Lookout was inspired by helping parents and co-workers with their computers. Instead of a phone call where you're both guessing, Lookout can actually see the screen and give specific, contextual guidance: "Click the blue Save button in the top-right corner" instead of "there should be a button somewhere."
 
 ## What it does
 
