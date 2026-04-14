@@ -21,3 +21,4 @@ LookoutBinary
 assets/*.mov
 # assets/icon_1024.png
 assets/Lookout.iconset/
+*.dmg
