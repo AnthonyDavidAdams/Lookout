@@ -1,31 +1,43 @@
-# Lookout
+<p align="center">
+  <img src="assets/icon_1024.png" alt="Lookout" width="128">
+</p>
 
-An AI screen assistant for macOS. Lookout sees your screen and helps you navigate your computer — like a knowledgeable friend looking over your shoulder.
+<h1 align="center">Lookout</h1>
+
+<p align="center">
+  <strong>AI screen assistant for macOS</strong><br>
+  Sees your screen. Helps you navigate. Takes action.
+</p>
 
 <p align="center">
   <img src="assets/demo.gif" alt="Lookout Demo" width="300">
 </p>
 
-## Why
+---
 
-Every day, people call their kids, coworkers, or IT help desk to ask "how do I do this on my computer?" They're staring at the screen, trying to describe what they see, while someone on the other end guesses what they're looking at.
+## 🧭 About
 
-Lookout was inspired by helping parents and co-workers with their computers. Instead of a phone call where you're both guessing, Lookout can actually see the screen and give specific, contextual guidance: "Click the blue Save button in the top-right corner" instead of "there should be a button somewhere."
+Every day, people call their kids, coworkers, or IT help desk to ask *"how do I do this on my computer?"* They're staring at the screen, trying to describe what they see, while someone on the other end guesses what they're looking at.
 
-## What it does
+**Lookout was inspired by helping parents and co-workers with their computers.** Instead of a phone call where you're both guessing, Lookout can actually *see* the screen and give specific, contextual guidance — "Click the blue Save button in the top-right corner" instead of "there should be a button somewhere."
 
-- **Sees your screen** — captures all connected displays via ScreenCaptureKit
-- **Understands context** — knows what apps are running, what windows are open
-- **Gives specific guidance** — references actual buttons, menus, and text it can see
-- **Takes action** — can open apps, find files, and search your Mac
-- **Streams responses** — answers appear in real-time as they're generated
-- **Smart about screenshots** — auto-captures at the start or after inactivity, uses a tool for on-demand captures (saves tokens on conversational follow-ups)
-- **Manages long conversations** — strips old images and auto-summarizes history to stay within context limits
-- **Personalizable** — add custom context in `~/.lookout/context.md` so it knows who you are
+It's like a knowledgeable friend looking over your shoulder.
 
-## Install
+## ✨ Features
 
-One command:
+| | Feature | Details |
+|---|---|---|
+| 👁️ | **Screen Vision** | Captures all connected displays via ScreenCaptureKit |
+| 🧠 | **Context Aware** | Knows what apps are running, what windows are open |
+| 🎯 | **Specific Guidance** | References actual buttons, menus, and text it can see |
+| 🛠️ | **Takes Action** | Opens apps, finds files, searches your Mac |
+| ⚡ | **Streaming** | Responses appear in real-time as they're generated |
+| 📸 | **Smart Capture** | Auto-screenshots on first message or after inactivity; on-demand tool for follow-ups |
+| 💬 | **Long Conversations** | Strips old images, auto-summarizes history to stay in context |
+| 🧑‍💻 | **Personalizable** | Custom context via `~/.lookout/context.md` |
+| 📝 | **Memory** | Saves notes about you across sessions for better help over time |
+
+## 🚀 Install
 
 ```bash
 git clone https://github.com/AnthonyDavidAdams/Lookout.git
@@ -33,14 +45,9 @@ cd Lookout
 ./install.sh
 ```
 
-This builds the app, installs it to `/Applications`, creates your config file, and offers to launch it.
+> Builds the app, installs to `/Applications`, creates your config, and offers to launch.
 
-Or build manually:
-
-```bash
-./build.sh
-open Lookout.app
-```
+Or build manually: `./build.sh && open Lookout.app`
 
 ### Prerequisites
 
@@ -48,88 +55,96 @@ open Lookout.app
 - Xcode Command Line Tools (`xcode-select --install`)
 - A [Claude API key](https://console.anthropic.com)
 
-### First run
+### First Run
 
 1. Click the **eye icon** in your menu bar
 2. Enter your Claude API key
-3. Grant **Screen Recording** permission when prompted
+3. Grant **Screen Recording** when prompted
 4. Ask anything about your screen
 
-## Personalize
+## 🎨 Personalize
 
-Edit `~/.lookout/context.md` to add context about yourself:
+Edit `~/.lookout/context.md` to tell Lookout about yourself:
 
-```markdown
+```
 I'm not very technical, please explain things simply.
 I use my Mac for photo editing with Lightroom and Photoshop.
 My name is Mom.
 ```
 
-This is included in every conversation so Lookout tailors its responses to you.
+Or edit directly in the app: **right-click menu bar icon → Settings → Context tab**
 
-## Usage
+Lookout also learns about you over time — it saves notes about what you work on, what you struggle with, and your preferences in `~/.lookout/notes.md`.
 
-- **Left-click** menu bar icon to toggle the chat panel
-- **Right-click** for menu (New Conversation, Settings, Quit)
-- The panel floats above other windows — drag it anywhere
+## 💡 Usage
 
-### Example questions
+| Action | How |
+|---|---|
+| Toggle panel | **Left-click** menu bar eye icon |
+| Menu | **Right-click** menu bar icon |
+| Move panel | Drag anywhere |
+| Close | Click the X or left-click the icon |
 
-- "What apps do I have open?"
-- "How do I change my wallpaper?"
-- "Can you find my recent PDFs?"
-- "Open Safari for me"
-- "I'm trying to export this document — where's the export button?"
+### Example Questions
 
-## Architecture
+> "What apps do I have open?"
+> "How do I change my wallpaper?"
+> "Can you find my recent PDFs?"
+> "Open Safari for me"
+> "I'm trying to export this document — where's the export button?"
 
-Pure Swift, no dependencies. Built with:
+## 🔧 How It Works
 
-- **SwiftUI** — chat interface
-- **ScreenCaptureKit** — screen capture (excludes own window)
-- **Claude API** — vision + tool use with streaming
-- **NSPanel** — floating, non-activating window
+Pure Swift, zero dependencies. Built with:
 
-### Tools available to the AI
+- **SwiftUI** — floating chat panel
+- **ScreenCaptureKit** — multi-display capture (excludes own window)
+- **Claude API** — vision + tool use with streaming responses
+- **NSPanel** — non-activating floating window
 
-| Tool | Description |
-|------|-------------|
+### Tools Available to the AI
+
+| Tool | What it does |
+|---|---|
 | `capture_screen` | Take a fresh screenshot of all displays |
-| `list_applications` | List installed apps |
+| `list_applications` | See what's installed on the Mac |
 | `search_files` | Spotlight search for files and folders |
-| `open_item` | Open an app, file, or folder |
+| `open_item` | Open any app, file, or folder |
+| `save_note` | Remember something about the user |
+| `read_notes` | Recall notes from previous sessions |
 
-## Project structure
+### Architecture
 
 ```
 Lookout/
-├── install.sh                   # One-click installer
-├── build.sh                     # Build script (no Xcode needed)
-├── setup.sh                     # Xcode project generator
-├── project.yml                  # xcodegen spec
+├── install.sh                        # One-click installer
+├── build.sh                          # Build from source
 └── Lookout/
-    ├── LookoutApp.swift         # App entry point
-    ├── AppDelegate.swift        # Menu bar + panel management
-    ├── FloatingPanel.swift      # NSPanel subclass
-    ├── Models/
-    │   └── Message.swift
+    ├── LookoutApp.swift              # Entry point
+    ├── AppDelegate.swift             # Menu bar + panel
+    ├── FloatingPanel.swift           # NSPanel subclass
+    ├── Models/Message.swift
     ├── Views/
-    │   ├── ChatView.swift       # Main chat interface
-    │   ├── MessageView.swift    # Message bubbles with markdown
-    │   └── SettingsView.swift
+    │   ├── ChatView.swift            # Chat interface
+    │   ├── MessageView.swift         # Markdown message bubbles
+    │   └── SettingsView.swift        # API key + context editor
     └── Services/
-        ├── ScreenCaptureService.swift    # Multi-display capture
-        ├── ClaudeAPIService.swift        # Streaming + tool use
-        ├── ConversationManager.swift     # State, history, summarization
-        ├── SystemContextService.swift    # Running apps + window titles
-        ├── CustomContextService.swift    # ~/.lookout/context.md reader
-        └── ActionService.swift           # Tool implementations
+        ├── ScreenCaptureService.swift      # Multi-display capture
+        ├── ClaudeAPIService.swift          # Streaming + tool use
+        ├── ConversationManager.swift       # History + summarization
+        ├── SystemContextService.swift      # Running apps + windows
+        ├── CustomContextService.swift      # ~/.lookout/context.md
+        └── ActionService.swift             # Tool implementations
 ```
 
-## License
+## 📄 License
 
 [CC BY-NC 4.0](LICENSE) — free for non-commercial use with attribution.
 
 ---
 
-Provided as a public utility by <a href="https://earthpilot.org"><img src="assets/earthpilot-logo.png" alt="Earth Pilot" width="18" height="18" style="vertical-align: middle;"></a> [Earth Pilot](https://earthpilot.org) — Mission Support for Spaceship Earth.
+<p align="center">
+  Provided as a public utility by
+  <a href="https://earthpilot.org"><img src="assets/earthpilot-logo.png" alt="Earth Pilot" width="18" height="18" style="vertical-align: middle;"></a>
+  <a href="https://earthpilot.org"><strong>Earth Pilot</strong></a> — Mission Support for Spaceship Earth.
+</p>
