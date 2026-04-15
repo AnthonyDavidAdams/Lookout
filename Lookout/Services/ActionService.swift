@@ -146,6 +146,95 @@ final class ActionService {
         return ActionResult(success: true, output: content)
     }
 
+    // MARK: - Highlight Element on Screen
+
+    private let visionService = VisionService()
+
+    /// Callback to show overlay — set by ConversationManager
+    var onHighlight: ((NSPoint, CGFloat, String?) -> Void)?
+
+    func highlightElement(textToFind: String, label: String?) async -> ActionResult {
+        // Capture a fresh screenshot to search in
+        let screenshots = await screenCapture.captureAllDisplays()
+        guard let screenshot = screenshots.first else {
+            return ActionResult(success: false, output: "Could not capture screen to search for element.")
+        }
+
+        guard let screen = await MainActor.run(body: { NSScreen.main }) else {
+            return ActionResult(success: false, output: "No screen available.")
+        }
+        let screenHeight = await MainActor.run { screen.frame.height }
+
+        // Use Vision OCR to find the text
+        guard let found = visionService.findElementCenter(
+            matching: textToFind,
+            in: screenshot,
+            screenHeight: screenHeight
+        ) else {
+            return ActionResult(
+                success: false,
+                output: "Could not find \"\(textToFind)\" on screen. It may not be visible or the text doesn't match exactly."
+            )
+        }
+
+        // Show overlay on main thread
+        let displayLabel = label ?? found.label
+        await MainActor.run {
+            onHighlight?(found.point, 25, displayLabel)
+        }
+
+        // Also crop the area around the found element and return as image
+        let cropSize: CGFloat = 200
+        let cropX = max(0, found.point.x - cropSize / 2)
+        let cropY = max(0, (screenHeight - found.point.y) - cropSize / 2)  // Flip back for image coords
+
+        if let nsImage = NSImage(data: screenshot),
+           let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) {
+            let imgW = CGFloat(cgImage.width)
+            let imgH = CGFloat(cgImage.height)
+            let cropRect = CGRect(
+                x: min(cropX, imgW - cropSize),
+                y: min(cropY, imgH - cropSize),
+                width: min(cropSize, imgW),
+                height: min(cropSize, imgH)
+            )
+            if let cropped = cgImage.cropping(to: cropRect) {
+                // Draw a highlight circle on the cropped image
+                let croppedImage = NSImage(cgImage: cropped, size: NSSize(width: cropped.width, height: cropped.height))
+                let highlighted = drawHighlightCircle(on: croppedImage)
+                if let tiffData = highlighted.tiffRepresentation,
+                   let bitmap = NSBitmapImageRep(data: tiffData),
+                   let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.8]) {
+                    return ActionResult(
+                        success: true,
+                        output: "Found \"\(found.label)\" on screen and highlighted it. The arrow on your screen points to it.",
+                        images: [jpegData]
+                    )
+                }
+            }
+        }
+
+        return ActionResult(success: true, output: "Found \"\(found.label)\" and highlighted it on your screen with an arrow.")
+    }
+
+    private func drawHighlightCircle(on image: NSImage) -> NSImage {
+        let result = NSImage(size: image.size)
+        result.lockFocus()
+        image.draw(at: .zero, from: NSRect(origin: .zero, size: image.size), operation: .copy, fraction: 1.0)
+
+        let ctx = NSGraphicsContext.current!.cgContext
+        let cx = image.size.width / 2
+        let cy = image.size.height / 2
+        let r: CGFloat = min(image.size.width, image.size.height) * 0.3
+
+        ctx.setStrokeColor(NSColor(red: 0.3, green: 0.6, blue: 1.0, alpha: 0.9).cgColor)
+        ctx.setLineWidth(4)
+        ctx.strokeEllipse(in: CGRect(x: cx - r, y: cy - r, width: r * 2, height: r * 2))
+
+        result.unlockFocus()
+        return result
+    }
+
     // MARK: - Dispatch
 
     func execute(toolName: String, input: [String: Any]) async -> ActionResult {
@@ -166,6 +255,10 @@ final class ActionService {
             return saveNote(note: note)
         case "read_notes":
             return readNotes()
+        case "highlight_element":
+            let text = input["text_to_find"] as? String ?? ""
+            let label = input["label"] as? String
+            return await highlightElement(textToFind: text, label: label)
         default:
             return ActionResult(success: false, output: "Unknown tool: \(toolName)")
         }

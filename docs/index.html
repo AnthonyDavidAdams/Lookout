@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lookout — AI Screen Assistant for macOS</title>
+    <meta name="description" content="Lookout sees your screen and helps you navigate your Mac. Like a knowledgeable friend looking over your shoulder.">
+    <meta property="og:title" content="Lookout — AI Screen Assistant for macOS">
+    <meta property="og:description" content="Sees your screen. Helps you navigate. Takes action.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/AnthonyDavidAdams/Lookout/main/assets/social-preview.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/png" href="icon.png">
+    <style>
+        :root {
+            --blue: #2997ff;
+            --blue-dark: #0071e3;
+            --gray-dark: #1d1d1f;
+            --gray-medium: #86868b;
+            --gray-light: #f5f5f7;
+            --white: #fff;
+            --black: #000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: var(--gray-dark);
+            background: var(--white);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-inner {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 22px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--gray-dark);
+        }
+
+        .nav-brand img {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+        }
+
+        .nav-brand span {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 12px;
+            color: var(--gray-dark);
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+        }
+
+        .nav-cta {
+            background: var(--blue-dark);
+            color: var(--white) !important;
+            padding: 6px 16px;
+            border-radius: 980px;
+            font-weight: 500;
+            opacity: 1 !important;
+            transition: background 0.3s !important;
+        }
+
+        .nav-cta:hover {
+            background: var(--blue) !important;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 24px 80px;
+            background: var(--black);
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(41, 151, 255, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-eyebrow {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--blue);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .hero h1 {
+            font-size: clamp(48px, 10vw, 96px);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.05;
+            margin-bottom: 24px;
+        }
+
+        .hero-sub {
+            font-size: clamp(21px, 3vw, 28px);
+            font-weight: 400;
+            color: var(--gray-medium);
+            max-width: 600px;
+            line-height: 1.4;
+            margin-bottom: 48px;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--blue-dark);
+            color: var(--white);
+            padding: 14px 32px;
+            border-radius: 980px;
+            font-size: 17px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: var(--blue);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            color: var(--blue);
+            padding: 14px 32px;
+            border-radius: 980px;
+            font-size: 17px;
+            font-weight: 500;
+            text-decoration: none;
+            border: 1px solid rgba(41, 151, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--blue);
+            background: rgba(41, 151, 255, 0.08);
+        }
+
+        .btn-arrow {
+            transition: transform 0.3s;
+        }
+
+        .btn-primary:hover .btn-arrow,
+        .btn-secondary:hover .btn-arrow {
+            transform: translateX(4px);
+        }
+
+        /* Hero device mockup */
+        .hero-device {
+            margin-top: 64px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-device img {
+            max-width: 380px;
+            width: 100%;
+            border-radius: 16px;
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                0 40px 80px rgba(0, 0, 0, 0.5),
+                0 0 120px rgba(41, 151, 255, 0.15);
+        }
+
+        /* Section base */
+        section {
+            padding: 120px 24px;
+        }
+
+        .section-inner {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .section-eyebrow {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--blue);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .section-headline {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .section-sub {
+            font-size: clamp(17px, 2vw, 21px);
+            color: var(--gray-medium);
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 64px;
+            line-height: 1.5;
+        }
+
+        /* People / heartwarming section */
+        .people {
+            background: var(--white);
+            overflow: hidden;
+        }
+
+        .people-story {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .people-story:last-child {
+            margin-bottom: 0;
+        }
+
+        .people-story.reverse {
+            direction: rtl;
+        }
+
+        .people-story.reverse > * {
+            direction: ltr;
+        }
+
+        .people-img {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        }
+
+        .people-img img {
+            width: 100%;
+            height: 360px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .people-text h3 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+
+        .people-text p {
+            font-size: 17px;
+            color: var(--gray-medium);
+            line-height: 1.65;
+        }
+
+        /* Problem section */
+        .problem {
+            background: var(--gray-light);
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .problem-text h3 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .problem-text p {
+            font-size: 17px;
+            color: var(--gray-medium);
+            line-height: 1.65;
+        }
+
+        .problem-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .chat-bubble {
+            padding: 16px 20px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.5;
+            max-width: 85%;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .chat-bubble.user {
+            background: var(--blue-dark);
+            color: var(--white);
+            align-self: flex-end;
+            border-bottom-right-radius: 6px;
+        }
+
+        .chat-bubble.assistant {
+            background: var(--white);
+            color: var(--gray-dark);
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Features grid */
+        .features {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        .features .section-headline {
+            color: var(--white);
+        }
+
+        .features .section-sub {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px 32px;
+            transition: all 0.4s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(41, 151, 255, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            font-size: 36px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 21px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.6;
+        }
+
+        /* Demo section */
+        .demo {
+            background: var(--gray-light);
+            text-align: center;
+        }
+
+        .demo-device {
+            max-width: 460px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(0, 0, 0, 0.06);
+        }
+
+        .demo-device img {
+            width: 100%;
+            display: block;
+        }
+
+        /* How it works */
+        .how-it-works {
+            background: var(--white);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            counter-reset: step;
+        }
+
+        .step {
+            text-align: center;
+            counter-increment: step;
+        }
+
+        .step::before {
+            content: counter(step);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--blue-dark);
+            color: var(--white);
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 auto 20px;
+        }
+
+        .step h3 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step p {
+            font-size: 14px;
+            color: var(--gray-medium);
+            line-height: 1.5;
+        }
+
+        /* Phish / Vision section */
+        .vision-section {
+            background: var(--black);
+            color: var(--white);
+            padding: 120px 24px;
+        }
+
+        .vision-inner {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .vision-text {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .vision-eyebrow {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .vision-text h2 {
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .vision-text p {
+            font-size: 17px;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 640px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow:
+                0 40px 80px rgba(0, 0, 0, 0.4),
+                0 0 80px rgba(41, 151, 255, 0.08);
+        }
+
+        .video-container::before {
+            content: '';
+            display: block;
+            padding-top: 56.25%;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .vision-caption {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.35);
+            line-height: 1.5;
+        }
+
+        .vision-caption a {
+            color: var(--blue);
+            text-decoration: none;
+        }
+
+        .vision-caption a:hover {
+            text-decoration: underline;
+        }
+
+        /* Tech specs */
+        .specs {
+            background: var(--gray-light);
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .spec-item {
+            background: var(--white);
+            padding: 40px;
+        }
+
+        .spec-label {
+            font-size: 13px;
+            color: var(--gray-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .spec-value {
+            font-size: 21px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        /* CTA */
+        .cta {
+            background: var(--white);
+            text-align: center;
+            padding: 160px 24px;
+        }
+
+        .cta h2 {
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .cta p {
+            font-size: 21px;
+            color: var(--gray-medium);
+            margin-bottom: 40px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--gray-light);
+            padding: 24px;
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .footer-inner {
+            max-width: 980px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        footer p {
+            font-size: 12px;
+            color: var(--gray-medium);
+        }
+
+        footer a {
+            font-size: 12px;
+            color: var(--gray-medium);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--gray-dark);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .photo-credit {
+            font-size: 11px;
+            color: var(--gray-medium);
+            margin-top: 4px;
+        }
+
+        .photo-credit a {
+            color: var(--gray-medium);
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 16px;
+            }
+
+            .nav-links a:not(.nav-cta) {
+                display: none;
+            }
+
+            .problem-grid {
+                grid-template-columns: 1fr;
+                gap: 48px;
+            }
+
+            .people-story {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .people-story.reverse {
+                direction: ltr;
+            }
+
+            .people-img img {
+                height: 280px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-cta-group {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-inner">
+            <a href="#" class="nav-brand">
+                <img src="icon.png" alt="Lookout">
+                <span>Lookout</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">Setup</a>
+                <a href="#specs">Specs</a>
+                <a href="https://github.com/AnthonyDavidAdams/Lookout" class="nav-cta">Download</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-eyebrow">AI Screen Assistant for macOS</div>
+        <h1>Sees your screen.<br>Gets the picture.</h1>
+        <p class="hero-sub">Lookout is like a knowledgeable friend looking over your shoulder. It sees exactly what you see and gives you specific, contextual help.</p>
+        <div class="hero-cta-group">
+            <a href="https://github.com/AnthonyDavidAdams/Lookout" class="btn-primary">
+                Download Free
+                <span class="btn-arrow">&rsaquo;</span>
+            </a>
+            <a href="#features" class="btn-secondary">
+                See what it can do
+                <span class="btn-arrow">&rsaquo;</span>
+            </a>
+        </div>
+        <div class="hero-device fade-in">
+            <img src="screenshot.png" alt="Lookout app interface showing the welcome screen">
+        </div>
+    </section>
+
+    <!-- People / heartwarming stories -->
+    <section class="people">
+        <div class="section-inner">
+            <div class="section-eyebrow">Built for real people</div>
+            <h2 class="section-headline">Help that actually<br>sees what you see.</h2>
+            <p class="section-sub">No more phone calls where you describe what's on screen while someone guesses. Lookout is the patient, knowledgeable help everyone deserves.</p>
+
+            <div class="people-story fade-in">
+                <div class="people-img">
+                    <img src="https://images.pexels.com/photos/6248428/pexels-photo-6248428.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Grandmother and grandchild using a tablet together" loading="lazy">
+                </div>
+                <div class="people-text">
+                    <h3>"Grandma, click the blue button in the top right."</h3>
+                    <p>Every family has this call. Someone's trying to help a parent or grandparent over the phone, both squinting at different screens, guessing at what the other person sees. Lookout sits right on their Mac and actually sees the screen. It points to the exact button, the exact menu, the exact setting. No FaceTime required.</p>
+                </div>
+            </div>
+
+            <div class="people-story reverse fade-in">
+                <div class="people-img">
+                    <img src="https://images.pexels.com/photos/7919624/pexels-photo-7919624.jpeg?auto=compress&cs=tinysrgb&w=800" alt="A happy family using a laptop together" loading="lazy">
+                </div>
+                <div class="people-text">
+                    <h3>The help desk that never closes.</h3>
+                    <p>It's 9 PM and you need to export a document, change a setting, or find a file you saved somewhere last week. There's nobody to call. Lookout is always there, always patient, and always looking at exactly what you're looking at. Ask it anything about your screen and get a real, specific answer.</p>
+                </div>
+            </div>
+
+            <div class="people-story fade-in">
+                <div class="people-img">
+                    <img src="https://images.pexels.com/photos/7983552/pexels-photo-7983552.jpeg?auto=compress&cs=tinysrgb&w=800" alt="A person teaching elderly people to use a laptop" loading="lazy">
+                </div>
+                <div class="people-text">
+                    <h3>Confidence, not dependence.</h3>
+                    <p>The goal isn't another tool people rely on forever. Lookout explains what it sees and why you're clicking what you're clicking. Over time, the questions get smaller and the confidence gets bigger. It remembers what you've asked before and builds on what you already know.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem / Solution -->
+    <section class="problem">
+        <div class="section-inner">
+            <div class="problem-grid">
+                <div class="problem-text fade-in">
+                    <h3>Phone calls where everyone's guessing are over.</h3>
+                    <p>Every day, people call their kids, coworkers, or IT help desk to ask "how do I do this on my computer?" They're staring at the screen trying to describe what they see, while someone on the other end guesses what they're looking at. Lookout actually sees your screen and gives you the specific answer.</p>
+                </div>
+                <div class="problem-visual fade-in">
+                    <div class="chat-bubble user">Where's the export button? I can't find it anywhere.</div>
+                    <div class="chat-bubble assistant">I can see it. Click the blue <strong>Share</strong> menu in the top-right corner of your document, then select <strong>Export as PDF</strong> &mdash; it's the third option down.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="section-inner">
+            <div class="section-eyebrow">Capabilities</div>
+            <h2 class="section-headline">Everything it takes<br>to help you navigate.</h2>
+            <p class="section-sub">Built with ScreenCaptureKit and Claude's vision, Lookout sees every pixel across all your displays and understands exactly what's on screen.</p>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">&#x1F441;</span>
+                    <h3>Screen Vision</h3>
+                    <p>Captures all connected displays instantly. Multi-monitor, no problem. It sees exactly what you see.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">&#x1F3AF;</span>
+                    <h3>Specific Guidance</h3>
+                    <p>References the actual buttons, menus, and text on your screen. No more generic instructions.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">&#x26A1;</span>
+                    <h3>Takes Action</h3>
+                    <p>Opens apps, finds files, searches your Mac. Ask it to do things and it actually does them.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">&#x1F9E0;</span>
+                    <h3>Context Aware</h3>
+                    <p>Knows what apps are running, what windows are open, and what you're working on right now.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">&#x1F4AC;</span>
+                    <h3>Real-time Streaming</h3>
+                    <p>Responses appear word-by-word as they're generated. No waiting for a wall of text.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <span class="feature-icon">&#x1F4DD;</span>
+                    <h3>Remembers You</h3>
+                    <p>Saves notes about your preferences across sessions. Gets better the more you use it.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo -->
+    <section class="demo">
+        <div class="section-inner">
+            <div class="section-eyebrow">In Action</div>
+            <h2 class="section-headline">See it work.</h2>
+            <p class="section-sub">Ask a question about what's on your screen and get a specific, actionable answer in seconds.</p>
+            <div class="demo-device fade-in">
+                <img src="demo.gif" alt="Lookout demo showing a conversation about screen content">
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-inner">
+            <div class="section-eyebrow">Setup</div>
+            <h2 class="section-headline">Up and running in two minutes.</h2>
+            <p class="section-sub">One command installs everything. No dependencies, no complexity.</p>
+            <div class="steps">
+                <div class="step fade-in">
+                    <h3>Clone</h3>
+                    <p>Clone the repo from GitHub to your Mac.</p>
+                </div>
+                <div class="step fade-in">
+                    <h3>Install</h3>
+                    <p>Run <code>./install.sh</code> and it builds and installs automatically.</p>
+                </div>
+                <div class="step fade-in">
+                    <h3>Authorize</h3>
+                    <p>Add your Claude API key and grant Screen Recording permission.</p>
+                </div>
+                <div class="step fade-in">
+                    <h3>Ask</h3>
+                    <p>Click the eye in your menu bar and start asking about your screen.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision / Phish Section -->
+    <section class="vision-section">
+        <div class="vision-inner">
+            <div class="vision-text fade-in">
+                <p class="vision-eyebrow">Inspired by immersion</p>
+                <h2>The best experiences start<br>with what you see.</h2>
+                <p>At Mondegreen 2024, Phish hid behind a screen and let the visuals do the talking. Psychedelic projections responded to every note in real time while the audience watched a living canvas instead of a stage. No performers to see. Just pure visual response to what was happening in the moment. Lookout works the same way: it watches your screen and responds to exactly what's there, right now.</p>
+            </div>
+            <div class="video-container fade-in">
+                <iframe
+                    width="800"
+                    height="450"
+                    src="https://www.youtube.com/embed/b-UsgKRNT0g?feature=oembed"
+                    title="Phish - 7/25/2025 Saratoga Springs, NY (4K HDR)"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            <p class="vision-caption fade-in">
+                Phish &mdash; Saratoga Springs, NY, July 2025 (4K HDR). Improvisation that responds to the moment.
+                <br>Real-time visuals that respond to music. Real-time AI that responds to your screen.
+            </p>
+        </div>
+    </section>
+
+    <!-- Tech Specs -->
+    <section class="specs" id="specs">
+        <div class="section-inner">
+            <div class="section-eyebrow">Under the Hood</div>
+            <h2 class="section-headline">Pure Swift.<br>Zero dependencies.</h2>
+            <p class="section-sub">Built natively for macOS with no third-party frameworks. Just Apple APIs and raw capability.</p>
+            <div class="specs-grid fade-in">
+                <div class="spec-item">
+                    <div class="spec-label">Language</div>
+                    <div class="spec-value">Swift 5.9+</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">UI Framework</div>
+                    <div class="spec-value">SwiftUI</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Screen Capture</div>
+                    <div class="spec-value">ScreenCaptureKit</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">AI Model</div>
+                    <div class="spec-value">Claude (Vision + Tools)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Dependencies</div>
+                    <div class="spec-value">None</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Requires</div>
+                    <div class="spec-value">macOS 14 Sonoma+</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">License</div>
+                    <div class="spec-value">CC BY-NC 4.0</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Price</div>
+                    <div class="spec-value">Free</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="cta">
+        <h2>Your Mac, with a second<br>pair of eyes.</h2>
+        <p>Download Lookout and never describe your screen over the phone again.</p>
+        <div class="hero-cta-group">
+            <a href="https://github.com/AnthonyDavidAdams/Lookout" class="btn-primary" style="background: var(--gray-dark);">
+                Get Lookout on GitHub
+                <span class="btn-arrow">&rsaquo;</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-inner">
+            <div>
+                <p>&copy; 2026 Anthony Adams. A public utility by <a href="https://earthpilot.org">Earth Pilot</a>.</p>
+                <p class="photo-credit">Photos by <a href="https://www.pexels.com/@kampus/" target="_blank" rel="noopener">Kampus Production</a> and <a href="https://www.pexels.com/@ron-lach/" target="_blank" rel="noopener">Ron Lach</a> on <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a>.</p>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/AnthonyDavidAdams/Lookout">GitHub</a>
+                <a href="https://github.com/AnthonyDavidAdams/Lookout/blob/main/LICENSE">License</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll animations -->
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -60px 0px'
+        });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
+
+</body>
+</html>

@@ -5,11 +5,13 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     private var statusItem: NSStatusItem!
     private var panel: FloatingPanel!
+    private var overlayWindow: OverlayWindow!
     let conversationManager = ConversationManager()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
 
+        setupOverlay()
         setupPanel()
         setupMenuBar()
 
@@ -23,6 +25,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
         // Show panel on launch
         showPanel()
+    }
+
+    // MARK: - Overlay
+
+    private func setupOverlay() {
+        overlayWindow = OverlayWindow()
+
+        // Wire the highlight callback from ActionService
+        conversationManager.onHighlight = { [weak self] point, radius, label in
+            self?.overlayWindow.showHighlight(at: point, radius: radius, label: label)
+        }
     }
 
     // MARK: - Panel
@@ -111,7 +124,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
         statusItem.menu = menu
         statusItem.button?.performClick(nil)
-        // Reset so left-click toggles normally next time
         statusItem.menu = nil
     }
 

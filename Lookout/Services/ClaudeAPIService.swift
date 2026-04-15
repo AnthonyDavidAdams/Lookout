@@ -26,6 +26,9 @@ final class ClaudeAPIService {
 
         You have tools to take actions on the user's computer:
         - capture_screen: take a fresh screenshot of all displays
+        - highlight_element: point an arrow at a specific button/text on screen \
+          (uses OCR to find it, draws a pulsing highlight). Use this whenever you \
+          tell the user to click something — show them exactly where it is.
         - list_applications: see what's installed
         - search_files: find files and folders by name or content
         - open_item: open an app, file, or folder
@@ -115,6 +118,24 @@ final class ClaudeAPIService {
                     ] as [String: Any]
                 ] as [String: Any],
                 "required": ["note"]
+            ] as [String: Any]
+        ],
+        [
+            "name": "highlight_element",
+            "description": "Highlight a specific UI element on the user's screen. Uses OCR to find the text and draws a pulsing arrow pointing directly at it. Also returns a cropped screenshot of the area. Use this when pointing the user to a specific button, menu item, or text on screen.",
+            "input_schema": [
+                "type": "object",
+                "properties": [
+                    "text_to_find": [
+                        "type": "string",
+                        "description": "The exact text to find on screen (button label, menu item, etc.)"
+                    ] as [String: Any],
+                    "label": [
+                        "type": "string",
+                        "description": "Optional label to display next to the highlight arrow (e.g. 'Click here')"
+                    ] as [String: Any]
+                ] as [String: Any],
+                "required": ["text_to_find"]
             ] as [String: Any]
         ],
         [

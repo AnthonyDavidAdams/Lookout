@@ -13,6 +13,11 @@ final class ConversationManager: ObservableObject {
     private let systemContext = SystemContextService()
     private let actionService = ActionService()
 
+    /// Callback for showing screen overlay highlights — wired by AppDelegate.
+    var onHighlight: ((NSPoint, CGFloat, String?) -> Void)? {
+        didSet { actionService.onHighlight = onHighlight }
+    }
+
     /// Full API conversation history (includes tool use messages not shown in chat).
     private var apiConversation: [[String: Any]] = []
 
